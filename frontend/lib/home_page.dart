@@ -35,11 +35,11 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  void getClients() async {
-    var url = Uri.parse('https://localhost:3000/clients');
+  void createClient() async {
+    var url = Uri.parse('https://localhost:3000/client');
     var response = await http.get(url);
-    var client = jsonDecode(response.body);
-    print(client);
+    var name = jsonDecode(response.body);
+    print(name);
     //var jsonObject = userName.fromJson(userName['results'][0]['name']['first']);
   }
 
@@ -64,8 +64,11 @@ class _HomePageState extends State<HomePage> {
                 print('First text field: $text');
               },
             ),
-            TextField(
-              controller: myController,
+            ElevatedButton(
+              onPressed: () {
+                createClient;
+              },
+              child: Text(''),
             ),
             Text(text),
           ],

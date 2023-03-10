@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:shelf/shelf.dart';
@@ -8,17 +9,25 @@ import 'package:shelf_cors_headers/shelf_cors_headers.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'dart:io' show Platform;
 
+import 'client_model.dart';
+
 // Configure routes.
 final _router = Router()
   ..get('/', _rootHandler)
-  ..post('/clients', _clientHandler);
+  ..post('/client', _clientHandler);
 
-Response _rootHandler(Request req) {
-  return Response.ok('Backend!\n');
+Future<Response> _rootHandler(Request request) async {
+  var body = await request.readAsString();
+  var result = ClientModel.fromMap(jsonDecode(body));
+  print(result.name);
+  return Response.ok(result.name);
 }
 
-Response _clientHandler(Request request) {
-  return Response.ok('$request\n');
+Future<Response> _clientHandler(Request request) async {
+  var body = await request.readAsString();
+  var result = ClientModel.fromMap(jsonDecode(body));
+  print(result.name);
+  return Response.ok(result.name);
 }
 
 void main(List<String> args) async {
