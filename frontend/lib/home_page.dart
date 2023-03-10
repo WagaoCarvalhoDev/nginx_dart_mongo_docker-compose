@@ -35,11 +35,21 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  void createClient() async {
-    var url = Uri.parse('https://localhost:3000/client');
-    var response = await http.get(url);
+  Future<String> createClient() async {
+    var url = Uri.parse('https://172.17.0.0:3000/client');
+    var response = await http.post(url);
+
     var name = jsonDecode(response.body);
-    print(name);
+    return name;
+    //var jsonObject = userName.fromJson(userName['results'][0]['name']['first']);
+  }
+
+  Future<String> getClient() async {
+    var url = Uri.parse('https://localhost:3000/');
+    var response = await http.get(url);
+
+    var text = jsonDecode(response.body);
+    return text;
     //var jsonObject = userName.fromJson(userName['results'][0]['name']['first']);
   }
 
@@ -66,9 +76,10 @@ class _HomePageState extends State<HomePage> {
             ),
             ElevatedButton(
               onPressed: () {
-                createClient;
+                createClient();
+                //text = getClient.toString();
               },
-              child: Text(''),
+              child: Text('Save'),
             ),
             Text(text),
           ],
