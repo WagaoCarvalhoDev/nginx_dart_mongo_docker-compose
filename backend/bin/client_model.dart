@@ -1,7 +1,7 @@
 class ClientModel {
-  final String name;
+  String? name;
 
-  ClientModel({required this.name});
+  ClientModel();
 
   Map<String, dynamic> toMap() {
     return {
@@ -9,9 +9,11 @@ class ClientModel {
     };
   }
 
+  factory ClientModel.fromRequest(Map map) {
+    return ClientModel()..name = map['name'];
+  }
+
   factory ClientModel.fromMap(Map<String, dynamic> map) {
-    return ClientModel(
-      name: map['name'] as String,
-    );
+    return ClientModel()..name = map['name'];
   }
 }

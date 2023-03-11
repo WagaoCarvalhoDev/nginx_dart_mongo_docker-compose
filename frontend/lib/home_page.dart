@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:frontend/client_model.dart';
 import 'package:http/http.dart' as http;
 
 // Define a custom Form widget.
@@ -16,32 +17,29 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   // Create a text controller and use it to retrieve the current value
   // of the TextField.
-  final myController = TextEditingController();
-  String text = 'Teste';
+  final TextEditingController _controller = TextEditingController();
+  Future<ClientModel>? _name;
 
-  @override
-  void initState() {
-    super.initState();
+  Future<ClientModel> createClient(String name) async {
+    final response = await http.post(
+      Uri.parse('http://localhost:3000/client'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'name': name,
+      }),
+    );
 
-    // Start listening to changes.
-    myController.addListener(_testValue);
-  }
-
-  @override
-  void dispose() {
-    // Clean up the controller when the widget is removed from the widget tree.
-    // This also removes the _printLatestValue listener.
-    myController.dispose();
-    super.dispose();
-  }
-
-  Future<String> createClient() async {
-    var url = Uri.parse('https://172.17.0.0:3000/client');
-    var response = await http.post(url);
-
-    var name = jsonDecode(response.body);
-    return name;
-    //var jsonObject = userName.fromJson(userName['results'][0]['name']['first']);
+    if (response.statusCode == 201) {
+      // If the server did return a 201 CREATED response,
+      // then parse the JSON.
+      return ClientModel(name: jsonEncode(response.body));
+    } else {
+      // If the server did not return a 201 CREATED response,
+      // then throw an exception.
+      throw Exception('Failed to create album.');
+    }
   }
 
   Future<String> getClient() async {
@@ -51,12 +49,6 @@ class _HomePageState extends State<HomePage> {
     var text = jsonDecode(response.body);
     return text;
     //var jsonObject = userName.fromJson(userName['results'][0]['name']['first']);
-  }
-
-  void _testValue() {
-    setState(() {
-      text = myController.text;
-    });
   }
 
   @override
@@ -70,18 +62,20 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             TextField(
-              onChanged: (text) {
-                print('First text field: $text');
-              },
+              controller: _controller,
+              decoration: const InputDecoration(hintText: 'Enter Title'),
             ),
             ElevatedButton(
               onPressed: () {
-                createClient();
+                setState(() {
+                  _name = createClient(_controller.text);
+                });
                 //text = getClient.toString();
               },
               child: Text('Save'),
             ),
-            Text(text),
+            Text(_name.toString()),
+            //Text(getClient().toString()),
           ],
         ),
       ),

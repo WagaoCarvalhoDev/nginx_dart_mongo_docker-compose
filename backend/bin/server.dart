@@ -4,12 +4,12 @@ import 'dart:io';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart';
 import 'package:shelf_router/shelf_router.dart';
-import 'package:shelf_cors_headers/shelf_cors_headers.dart';
 
 import 'package:mongo_dart/mongo_dart.dart';
 import 'dart:io' show Platform;
 
 import 'client_model.dart';
+import 'middleware_interception.dart';
 
 // Configure routes.
 final _router = Router()
@@ -25,9 +25,9 @@ Future<Response> _rootHandler(Request request) async {
 
 Future<Response> _clientHandler(Request request) async {
   var body = await request.readAsString();
-  var result = ClientModel.fromMap(jsonDecode(body));
+  var result = ClientModel.fromRequest(jsonDecode(body));
   print(result.name);
-  return Response.ok(result.name);
+  return Response(201, body: result.name);
 }
 
 void main(List<String> args) async {
@@ -37,15 +37,11 @@ void main(List<String> args) async {
   // Use any available host or container IP (usually `0.0.0.0`).
   final ip = InternetAddress.anyIPv4;
 
-  final overrideHeaders = {
-    ACCESS_CONTROL_ALLOW_ORIGIN: '*',
-    'Content-Type': 'application/json;charset=utf-8'
-  };
-
   // Configure a pipeline that logs requests.
   final handler = Pipeline()
       .addMiddleware(logRequests())
-      .addMiddleware(corsHeaders(headers: overrideHeaders))
+      .addMiddleware(MInterception.contentTypeJson)
+      .addMiddleware(MInterception.cors)
       .addHandler(_router);
 
   // For running in containers, we respect the PORT environment variable.
